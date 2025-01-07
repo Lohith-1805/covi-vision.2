@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Covi-Sift - About</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='about_styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-virus-slash"></i>
+            <span>Covi-Sift</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('test') }}"><i class="fas fa-vial"></i> Test</a></li>
+                <li><a href="{{ url_for('precautions') }}"><i class="fas fa-shield-virus"></i> Precautions</a></li>
+                <li><a href="{{ url_for('vaccinations') }}"><i class="fas fa-syringe"></i> Vaccinations</a></li>
+                <li><a href="{{ url_for('about') }}" class="active"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Understanding Respiratory Conditions</h1>
+            <p>Learn about COVID-19 and Pneumonia Detection</p>
+        </section>
+
+        <div class="content-container">
+            <section class="info-card covid">
+                <h2><i class="fas fa-virus"></i> COVID-19</h2>
+                <div class="card-content">
+                    <img src="{{ url_for('static', filename='about_img/covid.jpg') }}" alt="COVID-19 Illustration">
+                    <div class="text-content">
+                        <p>Coronavirus disease (COVID-19) is an infectious disease caused by the SARS-CoV-2 virus. Most people infected with the virus will experience mild to moderate respiratory illness and recover without requiring special treatment.</p>
+                        <h3>Common Symptoms:</h3>
+                        <ul>
+                            <li><i class="fas fa-thermometer-half"></i> Fever or chills</li>
+                            <li><i class="fas fa-head-side-cough"></i> Cough and shortness of breath</li>
+                            <li><i class="fas fa-tired"></i> Fatigue and body aches</li>
+                            <li><i class="fas fa-tongue"></i> Loss of taste or smell</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="info-card pneumonia">
+                <h2><i class="fas fa-lungs"></i> Viral Pneumonia</h2>
+                <div class="card-content">
+                    <img src="{{ url_for('static', filename='about_img/pneumonia.jpg') }}" alt="Pneumonia Illustration">
+                    <div class="text-content">
+                        <p>Viral pneumonia is an infection of the lungs caused by viruses. The infection causes inflammation in the air sacs of the lungs, leading to breathing difficulties and other symptoms.</p>
+                        <h3>Key Characteristics:</h3>
+                        <ul>
+                            <li><i class="fas fa-lungs-virus"></i> Inflammation of air sacs (alveoli)</li>
+                            <li><i class="fas fa-tint"></i> Fluid accumulation in lungs</li>
+                            <li><i class="fas fa-wind"></i> Difficulty breathing</li>
+                            <li><i class="fas fa-head-side-cough"></i> Chest pain and cough</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="comparison">
+                <h2><i class="fas fa-columns"></i> Comparison of Conditions</h2>
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>COVID-19</th>
+                                <th>Viral Pneumonia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Cause</td>
+                                <td>SARS-CoV-2 virus</td>
+                                <td>Various respiratory viruses</td>
+                            </tr>
+                            <tr>
+                                <td>X-ray Appearance</td>
+                                <td>Ground-glass opacity, bilateral infiltrates</td>
+                                <td>Patchy or diffuse infiltrates</td>
+                            </tr>
+                            <tr>
+                                <td>Onset</td>
+                                <td>Gradual onset over days</td>
+                                <td>Can be rapid or gradual</td>
+                            </tr>
+                            <tr>
+                                <td>Treatment Approach</td>
+                                <td>Supportive care, antivirals if severe</td>
+                                <td>Antiviral medication, supportive care</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{{ url_for('about') }}">About Us</a></li>
+                    <li><a href="{{ url_for('test') }}">Get Tested</a></li>
+                    <li><a href="{{ url_for('precautions') }}">Safety Measures</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p><i class="fas fa-envelope"></i> support@covisift.com</p>
+                <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Covi-Sift. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Covi-Sift</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index_style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-virus-slash"></i>
+            <span>Covi-Sift</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('test') }}"><i class="fas fa-vial"></i> Test</a></li>
+                <li><a href="{{ url_for('precautions') }}"><i class="fas fa-shield-virus"></i> Precautions</a></li>
+                <li><a href="{{ url_for('vaccinations') }}"><i class="fas fa-syringe"></i> Vaccinations</a></li>
+                <li><a href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>AI-Powered COVID-19 Detection</h1>
+                <p class="subtitle">Advanced chest X-ray analysis for early detection</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Smart Detection</h3>
+                        <p>Powered by advanced AI algorithms</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Instant Results</h3>
+                        <p>Get analysis within seconds</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>High Accuracy</h3>
+                        <p>Trained on extensive medical data</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-lock"></i>
+                        <h3>Secure</h3>
+                        <p>Your data privacy is our priority</p>
+                    </div>
+                </div>
+
+                <div class="cta-buttons">
+                    <a href="{{ url_for('test') }}" class="btn primary">
+                        <i class="fas fa-vial"></i> Start Test
+                    </a>
+                    <a href="{{ url_for('about') }}" class="btn secondary">
+                        <i class="fas fa-info-circle"></i> Learn More
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <div class="container">
+                <h2>Why Choose Covi-Sift?</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="icon-circle">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>Quick Results</h3>
+                        <p>Get your analysis results in less than a minute</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon-circle">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>Medical Grade</h3>
+                        <p>Built with healthcare professionals</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon-circle">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>Easy to Use</h3>
+                        <p>Simple interface for quick analysis</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{{ url_for('about') }}">About Us</a></li>
+                    <li><a href="{{ url_for('test') }}">Get Tested</a></li>
+                    <li><a href="{{ url_for('precautions') }}">Safety Measures</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p><i class="fas fa-envelope"></i> support@covisift.com</p>
+                <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Covi-Sift. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

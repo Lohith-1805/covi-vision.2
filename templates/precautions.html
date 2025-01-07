@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Covi-Sift - Precautions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='p_styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-virus-slash"></i>
+            <span>Covi-Sift</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="{{ url_for('test') }}"><i class="fas fa-vial"></i> Test</a></li>
+                <li><a href="{{ url_for('precautions') }}" class="active"><i class="fas fa-shield-virus"></i> Precautions</a></li>
+                <li><a href="{{ url_for('vaccinations') }}"><i class="fas fa-syringe"></i> Vaccinations</a></li>
+                <li><a href="{{ url_for('about') }}"><i class="fas fa-info-circle"></i> About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Essential COVID-19 Precautions</h1>
+            <p>Protect yourself and others with these vital safety measures</p>
+        </section>
+
+        <div class="content-container">
+            <section class="precautions">
+                <div class="precaution-grid">
+                    <div class="precaution-card">
+                        <div class="precaution-icon">
+                            <i class="fas fa-head-side-mask"></i>
+                        </div>
+                        <h3>Wear a Mask</h3>
+                        <p>Protect yourself and others from airborne particles</p>
+                        <ul class="tips">
+                            <li><i class="fas fa-check"></i> Use N95 or surgical masks</li>
+                            <li><i class="fas fa-check"></i> Ensure proper fit around nose and mouth</li>
+                            <li><i class="fas fa-check"></i> Replace masks regularly</li>
+                            <li><i class="fas fa-check"></i> Wear in public spaces</li>
+                        </ul>
+                    </div>
+
+                    <div class="precaution-card">
+                        <div class="precaution-icon">
+                            <i class="fas fa-hands-wash"></i>
+                        </div>
+                        <h3>Hand Hygiene</h3>
+                        <p>Maintain proper hand sanitization</p>
+                        <ul class="tips">
+                            <li><i class="fas fa-check"></i> Wash hands for 20 seconds</li>
+                            <li><i class="fas fa-check"></i> Use alcohol-based sanitizer</li>
+                            <li><i class="fas fa-check"></i> Clean frequently touched surfaces</li>
+                            <li><i class="fas fa-check"></i> Avoid touching face</li>
+                        </ul>
+                    </div>
+
+                    <div class="precaution-card">
+                        <div class="precaution-icon">
+                            <i class="fas fa-people-arrows"></i>
+                        </div>
+                        <h3>Social Distancing</h3>
+                        <p>Maintain safe physical distance</p>
+                        <ul class="tips">
+                            <li><i class="fas fa-check"></i> Keep 6 feet distance</li>
+                            <li><i class="fas fa-check"></i> Avoid crowded places</li>
+                            <li><i class="fas fa-check"></i> Limit social gatherings</li>
+                            <li><i class="fas fa-check"></i> Choose outdoor settings</li>
+                        </ul>
+                    </div>
+
+                    <div class="precaution-card">
+                        <div class="precaution-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h3>Boost Immunity</h3>
+                        <p>Strengthen your immune system</p>
+                        <ul class="tips">
+                            <li><i class="fas fa-check"></i> Eat nutritious foods</li>
+                            <li><i class="fas fa-check"></i> Exercise regularly</li>
+                            <li><i class="fas fa-check"></i> Get adequate sleep</li>
+                            <li><i class="fas fa-check"></i> Stay hydrated</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="additional-info">
+                <h2><i class="fas fa-info-circle"></i> Additional Safety Measures</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <i class="fas fa-home"></i>
+                        <h3>Stay Home When Sick</h3>
+                        <p>If you experience any symptoms, isolate yourself and seek medical attention.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-wind"></i>
+                        <h3>Proper Ventilation</h3>
+                        <p>Ensure good airflow in indoor spaces by opening windows and using air purifiers.</p>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-soap"></i>
+                        <h3>Regular Cleaning</h3>
+                        <p>Disinfect frequently touched surfaces and personal items regularly.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{{ url_for('about') }}">About Us</a></li>
+                    <li><a href="{{ url_for('test') }}">Get Tested</a></li>
+                    <li><a href="{{ url_for('precautions') }}">Safety Measures</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p><i class="fas fa-envelope"></i> support@covisift.com</p>
+                <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Covi-Sift. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
