@@ -50,17 +50,29 @@ class_mapping = {
 model = None
 try:
     model = ResNetClassifier(num_classes=3)
-    # Add weights_only=True and handle potential file not found
     if os.path.exists(MODEL_PATH):
-        model.load_state_dict(
-            torch.load(
-                MODEL_PATH, 
-                map_location=torch.device('cpu'),
-                weights_only=True  # Add this parameter
-            ), 
-            strict=False
-        )
+        try:
+            # First try with weights_only=True
+            model.load_state_dict(
+                torch.load(
+                    MODEL_PATH, 
+                    map_location=torch.device('cpu'),
+                    weights_only=True
+                ), 
+                strict=False
+            )
+        except Exception as weight_error:
+            print(f"Warning: Failed to load with weights_only=True: {weight_error}")
+            # Fall back to regular loading if weights_only fails
+            model.load_state_dict(
+                torch.load(
+                    MODEL_PATH, 
+                    map_location=torch.device('cpu')
+                ), 
+                strict=False
+            )
         model.eval()
+        print("Model loaded successfully")
     else:
         print(f"Warning: Model file not found at {MODEL_PATH}")
 except Exception as e:
