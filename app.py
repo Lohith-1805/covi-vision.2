@@ -52,40 +52,41 @@ try:
     model = ResNetClassifier(num_classes=3)
     if os.path.exists(MODEL_PATH):
         print(f"Found model file at {MODEL_PATH}")
-        try:
-            # Try loading with default settings first
-            state_dict = torch.load(
-                MODEL_PATH, 
-                map_location=torch.device('cpu')
-            )
-            model.load_state_dict(state_dict, strict=False)
-            model.eval()
-            print("Model loaded successfully with default settings")
-        except Exception as e:
-            print(f"Error loading model with default settings: {e}")
-            try:
-                # Try alternative loading method
-                state_dict = torch.load(
-                    MODEL_PATH,
-                    map_location=torch.device('cpu'),
-                    pickle_module=torch.serialization.pickle
-                )
-                model.load_state_dict(state_dict, strict=False)
-                model.eval()
-                print("Model loaded successfully with alternative method")
-            except Exception as alt_e:
-                print(f"Error loading model with alternative method: {alt_e}")
-                model = None
+        print(f"File size: {os.path.getsize(MODEL_PATH) / (1024*1024):.2f} MB")
+        
+        # Simple, direct loading approach
+        checkpoint = torch.load(
+            MODEL_PATH, 
+            map_location='cpu'  # Explicitly use string instead of torch.device
+        )
+        
+        # Debug information
+        print(f"Checkpoint type: {type(checkpoint)}")
+        if isinstance(checkpoint, dict):
+            print(f"Checkpoint keys: {checkpoint.keys()}")
+        
+        # Load the state dict
+        model.load_state_dict(checkpoint, strict=False)
+        model.eval()
+        print("Model loaded successfully")
     else:
         print(f"Warning: Model file not found at {MODEL_PATH}")
+        # Print current directory and its contents for debugging
+        print(f"Current directory: {os.getcwd()}")
+        print(f"Directory contents: {os.listdir('.')}")
+        if os.path.exists('model_checkpoints'):
+            print(f"Model checkpoints directory contents: {os.listdir('model_checkpoints')}")
         model = None
 except Exception as e:
-    print(f"Error initializing model: {e}")
+    print(f"Error loading model: {e}")
+    print(f"Error type: {type(e)}")
+    print(f"Error details: {str(e)}")
     model = None
 
 # Add this to verify model state
 if model is not None:
     print("Model initialized and ready for predictions")
+    print(f"Model device: {next(model.parameters()).device}")
 else:
     print("WARNING: Model failed to load - predictions will not be available")
 
