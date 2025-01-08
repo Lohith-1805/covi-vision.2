@@ -85,28 +85,30 @@ def download_from_drive(file_id, output_path):
 MODEL_PATH = 'model_checkpoints/covid_model_converted.pth'
 GDRIVE_FILE_ID = '1xrRWOWfp52f7wr2FcM-EkDAyU6eurFo7'  # Your new file ID
 
-model = None
-try:
-    if not os.path.exists(MODEL_PATH):
-        print("Downloading model from Google Drive...")
-        download_success = download_from_drive(GDRIVE_FILE_ID, MODEL_PATH)
-        if not download_success:
-            raise Exception("Failed to download model")
-    
-    print(f"Loading model from {MODEL_PATH}")
-    model = ResNetClassifier(num_classes=3)
-    
-    print("Loading state dict...")
-    state_dict = torch.load(MODEL_PATH, map_location='cpu')
-    model.load_state_dict(state_dict)
-    model.eval()
-    print("Model loaded successfully")
-    
-except Exception as e:
-    print(f"Error in model initialization: {e}")
-    print(f"Error type: {type(e)}")
-    print(f"Error details: {str(e)}")
-    model = None
+def load_model_efficient():
+    try:
+        if not os.path.exists(MODEL_PATH):
+            print("Downloading model from Google Drive...")
+            download_success = download_from_drive(GDRIVE_FILE_ID, MODEL_PATH)
+            if not download_success:
+                raise Exception("Failed to download model")
+        
+        print(f"Loading model from {MODEL_PATH}")
+        model = ResNetClassifier(num_classes=3)
+        
+        print("Loading state dict...")
+        state_dict = torch.load(MODEL_PATH, map_location='cpu', weights_only=True)
+        model.load_state_dict(state_dict)
+        model.eval()
+        model = model.half()
+        print("Model loaded successfully")
+        return model
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return None
+
+# Initialize model
+model = load_model_efficient()
 
 if model is not None:
     print("Model initialized and ready for predictions")
