@@ -51,32 +51,43 @@ model = None
 try:
     model = ResNetClassifier(num_classes=3)
     if os.path.exists(MODEL_PATH):
+        print(f"Found model file at {MODEL_PATH}")
         try:
-            # First try with weights_only=True
-            model.load_state_dict(
-                torch.load(
-                    MODEL_PATH, 
+            # Try loading with default settings first
+            state_dict = torch.load(
+                MODEL_PATH, 
+                map_location=torch.device('cpu')
+            )
+            model.load_state_dict(state_dict, strict=False)
+            model.eval()
+            print("Model loaded successfully with default settings")
+        except Exception as e:
+            print(f"Error loading model with default settings: {e}")
+            try:
+                # Try alternative loading method
+                state_dict = torch.load(
+                    MODEL_PATH,
                     map_location=torch.device('cpu'),
-                    weights_only=True
-                ), 
-                strict=False
-            )
-        except Exception as weight_error:
-            print(f"Warning: Failed to load with weights_only=True: {weight_error}")
-            # Fall back to regular loading if weights_only fails
-            model.load_state_dict(
-                torch.load(
-                    MODEL_PATH, 
-                    map_location=torch.device('cpu')
-                ), 
-                strict=False
-            )
-        model.eval()
-        print("Model loaded successfully")
+                    pickle_module=torch.serialization.pickle
+                )
+                model.load_state_dict(state_dict, strict=False)
+                model.eval()
+                print("Model loaded successfully with alternative method")
+            except Exception as alt_e:
+                print(f"Error loading model with alternative method: {alt_e}")
+                model = None
     else:
         print(f"Warning: Model file not found at {MODEL_PATH}")
+        model = None
 except Exception as e:
-    print(f"Error loading model: {e}")
+    print(f"Error initializing model: {e}")
+    model = None
+
+# Add this to verify model state
+if model is not None:
+    print("Model initialized and ready for predictions")
+else:
+    print("WARNING: Model failed to load - predictions will not be available")
 
 @app.route('/')
 def index():
