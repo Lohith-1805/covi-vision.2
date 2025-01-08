@@ -46,9 +46,25 @@ class_mapping = {
     2: 'Pneumonia'   # Class 2 (not 3) for Pneumonia
 }
 
-model = ResNetClassifier(num_classes=3)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')), strict=False)
-model.eval()  # Set to evaluation mode
+# Initialize model only if the file exists
+model = None
+try:
+    model = ResNetClassifier(num_classes=3)
+    # Add weights_only=True and handle potential file not found
+    if os.path.exists(MODEL_PATH):
+        model.load_state_dict(
+            torch.load(
+                MODEL_PATH, 
+                map_location=torch.device('cpu'),
+                weights_only=True  # Add this parameter
+            ), 
+            strict=False
+        )
+        model.eval()
+    else:
+        print(f"Warning: Model file not found at {MODEL_PATH}")
+except Exception as e:
+    print(f"Error loading model: {e}")
 
 @app.route('/')
 def index():
@@ -72,6 +88,12 @@ def test():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    if model is None:
+        return jsonify({
+            'success': False,
+            'error': 'Model not loaded'
+        })
+        
     try:
         file = request.files['image']
         
