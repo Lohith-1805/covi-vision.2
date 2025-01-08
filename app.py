@@ -45,7 +45,7 @@ class_mapping = {
 }
 
 model = ResNetClassifier(num_classes=3)
-model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')), strict=False)
 model.eval()  # Set to evaluation mode
 
 @app.route('/')
@@ -115,4 +115,5 @@ def predict():
         })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
