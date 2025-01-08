@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Covi-Sift - Test</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='test_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/test_styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -110,91 +110,6 @@
         </div>
     </footer>
 
-    <script>
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const submitButton = document.getElementById('submitButton');
-        const uploadIcon = document.getElementById('uploadIcon');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const previewImage = document.getElementById('previewImage');
-        const resultContainer = document.getElementById('resultContainer');
-        const predictionResult = document.getElementById('predictionResult');
-
-        // Handle drag and drop
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            handleFile(file);
-        });
-
-        // Handle click to upload
-        dropZone.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', () => {
-            const file = fileInput.files[0];
-            handleFile(file);
-        });
-
-        function handleFile(file) {
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    uploadIcon.style.display = 'none';
-                    imagePreviewContainer.style.display = 'block';
-                    previewImage.src = e.target.result;
-                    submitButton.disabled = false;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        submitButton.addEventListener('click', function() {
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Please select a file first');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            submitButton.disabled = true;
-            submitButton.textContent = 'Analyzing...';
-
-            fetch('/predict', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    predictionResult.textContent = data.prediction;
-                    resultContainer.style.display = 'block';
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred during analysis');
-            })
-            .finally(() => {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Analyze Image';
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

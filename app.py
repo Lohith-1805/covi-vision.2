@@ -8,12 +8,14 @@ from PIL import Image
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__, 
     static_url_path='/static',  # explicitly set static url path
     static_folder='static',     # explicitly set static folder
     template_folder='templates' # explicitly set template folder
 )
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 # Load the PyTorch model
 MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
@@ -115,5 +117,5 @@ def predict():
         })
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
