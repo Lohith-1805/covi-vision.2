@@ -54,20 +54,19 @@ try:
         print(f"Found model file at {MODEL_PATH}")
         print(f"File size: {os.path.getsize(MODEL_PATH) / (1024*1024):.2f} MB")
         
-        # Add weights_only=True and safe loading parameters
-        checkpoint = torch.load(
-            MODEL_PATH, 
-            map_location='cpu',
-            weights_only=True  # Add this parameter
-        )
-        
-        # Add more detailed error checking
-        if isinstance(checkpoint, dict):
-            print(f"Checkpoint keys: {checkpoint.keys()}")
-            if 'state_dict' in checkpoint:
-                checkpoint = checkpoint['state_dict']
-            
         try:
+            # First try loading with weights_only=False
+            checkpoint = torch.load(
+                MODEL_PATH, 
+                map_location='cpu'
+            )
+            
+            # Add more detailed error checking
+            if isinstance(checkpoint, dict):
+                print(f"Checkpoint keys: {checkpoint.keys()}")
+                if 'state_dict' in checkpoint:
+                    checkpoint = checkpoint['state_dict']
+            
             model.load_state_dict(checkpoint, strict=False)
             model.eval()
             print("Model loaded successfully")
