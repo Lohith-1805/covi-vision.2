@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Response:', data);
 
             if (data.success) {
-                predictionResult.textContent = `${data.prediction} (Confidence: ${data.confidence})`;
+                predictionResult.textContent = data.prediction;
                 resultContainer.style.display = 'block';
             } else {
                 alert('Error: ' + (data.error || 'Unable to process image'));

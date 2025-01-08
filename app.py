@@ -129,9 +129,7 @@ def predict():
             outputs = model(image_tensor)
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
             predicted_class = torch.argmax(probabilities[0]).item()
-            confidence = float(probabilities[0][predicted_class])
         
-        # Use the correct class mapping
         result = {
             0: "COVID",
             1: "Normal",
@@ -140,8 +138,7 @@ def predict():
         
         return jsonify({
             'success': True,
-            'prediction': result[predicted_class],
-            'confidence': f"{confidence * 100:.2f}%"
+            'prediction': result[predicted_class]
         })
         
     except Exception as e:
