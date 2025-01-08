@@ -10,6 +10,8 @@ import torch.nn.functional as F
 import torchvision.models as models
 from werkzeug.middleware.proxy_fix import ProxyFix
 import requests
+import subprocess
+import sys
 
 app = Flask(__name__, 
     static_url_path='/static',  # explicitly set static url path
@@ -50,41 +52,50 @@ def get_confirm_token(response):
             return value
     return None
 
-def download_file_from_google_drive(file_id, destination):
-    URL = "https://drive.google.com/uc?export=download"
-    
-    session = requests.Session()
-    
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = get_confirm_token(response)
-    
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
+def install_gdown():
+    try:
+        import gdown
+    except ImportError:
+        print("Installing gdown...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "gdown"])
+        import gdown
+    return gdown
+
+def download_from_drive(file_id, output_path):
+    gdown = install_gdown()
     
     # Create directory if it doesn't exist
-    os.makedirs(os.path.dirname(destination), exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    # Construct the download URL
+    url = f"https://drive.google.com/uc?id={file_id}"
+    
+    print(f"Downloading from: {url}")
+    print(f"Saving to: {output_path}")
     
     # Download the file
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(32768):
-            if chunk:
-                f.write(chunk)
+    try:
+        gdown.download(url, output_path, quiet=False)
+        return True
+    except Exception as e:
+        print(f"Download error: {str(e)}")
+        return False
 
 # Initialize model
 MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
-GDRIVE_FILE_ID = '1LLTVVGjEumLB7WMGMBVmtsCCjYOerhMZ'  # Extract this from your Google Drive link
+GDRIVE_FILE_ID = '1D06K9Pew6fiVEwXCNnzXkoHazouV_6IO'
 
 model = None
 try:
     if not os.path.exists(MODEL_PATH):
         print("Downloading model from Google Drive...")
-        download_file_from_google_drive(GDRIVE_FILE_ID, MODEL_PATH)
-        print("Download completed!")
+        download_success = download_from_drive(GDRIVE_FILE_ID, MODEL_PATH)
+        if not download_success:
+            raise Exception("Failed to download model")
     
     print(f"Loading model from {MODEL_PATH}")
     model = ResNetClassifier(num_classes=3)
-    checkpoint = torch.load(MODEL_PATH, map_location='cpu')
+    checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=True)
     
     if isinstance(checkpoint, dict):
         if 'state_dict' in checkpoint:
