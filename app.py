@@ -81,9 +81,9 @@ def download_from_drive(file_id, output_path):
         print(f"Download error: {str(e)}")
         return False
 
-# Initialize model
-MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
-GDRIVE_FILE_ID = '1D06K9Pew6fiVEwXCNnzXkoHazouV_6IO'
+# Update model path and file ID
+MODEL_PATH = 'model_checkpoints/covid_model_converted.pth'
+GDRIVE_FILE_ID = '1xrRWOWfp52f7wr2FcM-EkDAyU6eurFo7'  # Your new file ID
 
 model = None
 try:
@@ -96,31 +96,11 @@ try:
     print(f"Loading model from {MODEL_PATH}")
     model = ResNetClassifier(num_classes=3)
     
-    print("Attempting to load model weights...")
-    try:
-        # Try loading with torch.load directly
-        checkpoint = torch.load(MODEL_PATH, map_location='cpu')
-        print(f"Checkpoint type: {type(checkpoint)}")
-        
-        if isinstance(checkpoint, dict):
-            print(f"Available keys: {checkpoint.keys()}")
-            if 'state_dict' in checkpoint:
-                checkpoint = checkpoint['state_dict']
-            elif 'model_state_dict' in checkpoint:
-                checkpoint = checkpoint['model_state_dict']
-        
-        # Print first few keys to debug
-        if isinstance(checkpoint, dict):
-            print("First few state dict keys:", list(checkpoint.keys())[:5])
-        
-        model.load_state_dict(checkpoint)
-        model.eval()
-        print("Model loaded successfully")
-        
-    except Exception as e:
-        print(f"Error during model loading: {e}")
-        print(f"Error type: {type(e)}")
-        raise e
+    print("Loading state dict...")
+    state_dict = torch.load(MODEL_PATH, map_location='cpu')
+    model.load_state_dict(state_dict)
+    model.eval()
+    print("Model loaded successfully")
     
 except Exception as e:
     print(f"Error in model initialization: {e}")
