@@ -96,24 +96,34 @@ try:
     print(f"Loading model from {MODEL_PATH}")
     model = ResNetClassifier(num_classes=3)
     
+    print("Attempting to load model weights...")
     try:
-        # First try with weights_only=True
-        checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=True)
-    except Exception as e:
-        print(f"Warning: Failed to load with weights_only=True, attempting without: {e}")
-        # If that fails, try without weights_only (since we trust our own model file)
+        # Try loading with torch.load directly
         checkpoint = torch.load(MODEL_PATH, map_location='cpu')
-    
-    if isinstance(checkpoint, dict):
-        if 'state_dict' in checkpoint:
-            checkpoint = checkpoint['state_dict']
-    
-    model.load_state_dict(checkpoint)
-    model.eval()
-    print("Model loaded successfully")
+        print(f"Checkpoint type: {type(checkpoint)}")
+        
+        if isinstance(checkpoint, dict):
+            print(f"Available keys: {checkpoint.keys()}")
+            if 'state_dict' in checkpoint:
+                checkpoint = checkpoint['state_dict']
+            elif 'model_state_dict' in checkpoint:
+                checkpoint = checkpoint['model_state_dict']
+        
+        # Print first few keys to debug
+        if isinstance(checkpoint, dict):
+            print("First few state dict keys:", list(checkpoint.keys())[:5])
+        
+        model.load_state_dict(checkpoint)
+        model.eval()
+        print("Model loaded successfully")
+        
+    except Exception as e:
+        print(f"Error during model loading: {e}")
+        print(f"Error type: {type(e)}")
+        raise e
     
 except Exception as e:
-    print(f"Error loading model: {e}")
+    print(f"Error in model initialization: {e}")
     print(f"Error type: {type(e)}")
     print(f"Error details: {str(e)}")
     model = None
