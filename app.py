@@ -54,28 +54,28 @@ try:
         print(f"Found model file at {MODEL_PATH}")
         print(f"File size: {os.path.getsize(MODEL_PATH) / (1024*1024):.2f} MB")
         
-        # Simple, direct loading approach
+        # Add weights_only=True and safe loading parameters
         checkpoint = torch.load(
             MODEL_PATH, 
-            map_location='cpu'  # Explicitly use string instead of torch.device
+            map_location='cpu',
+            weights_only=True  # Add this parameter
         )
         
-        # Debug information
-        print(f"Checkpoint type: {type(checkpoint)}")
+        # Add more detailed error checking
         if isinstance(checkpoint, dict):
             print(f"Checkpoint keys: {checkpoint.keys()}")
-        
-        # Load the state dict
-        model.load_state_dict(checkpoint, strict=False)
-        model.eval()
-        print("Model loaded successfully")
+            if 'state_dict' in checkpoint:
+                checkpoint = checkpoint['state_dict']
+            
+        try:
+            model.load_state_dict(checkpoint, strict=False)
+            model.eval()
+            print("Model loaded successfully")
+        except Exception as load_error:
+            print(f"Error loading state dict: {load_error}")
+            model = None
     else:
         print(f"Warning: Model file not found at {MODEL_PATH}")
-        # Print current directory and its contents for debugging
-        print(f"Current directory: {os.getcwd()}")
-        print(f"Directory contents: {os.listdir('.')}")
-        if os.path.exists('model_checkpoints'):
-            print(f"Model checkpoints directory contents: {os.listdir('model_checkpoints')}")
         model = None
 except Exception as e:
     print(f"Error loading model: {e}")
