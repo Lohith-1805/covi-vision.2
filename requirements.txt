@@ -6,4 +6,6 @@ opencv-python
 pillow
 waitress
 gunicorn
+gdown
+requests
 git-lfs
