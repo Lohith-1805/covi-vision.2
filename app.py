@@ -95,7 +95,14 @@ try:
     
     print(f"Loading model from {MODEL_PATH}")
     model = ResNetClassifier(num_classes=3)
-    checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=True)
+    
+    try:
+        # First try with weights_only=True
+        checkpoint = torch.load(MODEL_PATH, map_location='cpu', weights_only=True)
+    except Exception as e:
+        print(f"Warning: Failed to load with weights_only=True, attempting without: {e}")
+        # If that fails, try without weights_only (since we trust our own model file)
+        checkpoint = torch.load(MODEL_PATH, map_location='cpu')
     
     if isinstance(checkpoint, dict):
         if 'state_dict' in checkpoint:
@@ -111,7 +118,6 @@ except Exception as e:
     print(f"Error details: {str(e)}")
     model = None
 
-# Add this to verify model state
 if model is not None:
     print("Model initialized and ready for predictions")
     print(f"Model device: {next(model.parameters()).device}")
