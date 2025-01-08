@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitButton.addEventListener('click', async () => {
         const file = fileInput.files[0] || new File([], '');
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('image', file);
 
         try {
             submitButton.disabled = true;
@@ -67,9 +67,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const data = await response.json();
+            console.log('Response:', data);
 
             if (data.success) {
-                predictionResult.textContent = data.prediction;
+                predictionResult.textContent = `${data.prediction} (Confidence: ${data.confidence})`;
                 resultContainer.style.display = 'block';
             } else {
                 alert('Error: ' + (data.error || 'Unable to process image'));
