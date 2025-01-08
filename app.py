@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 from werkzeug.middleware.proxy_fix import ProxyFix
+import requests
 
 app = Flask(__name__, 
     static_url_path='/static',  # explicitly set static url path
@@ -16,9 +17,6 @@ app = Flask(__name__,
     template_folder='templates' # explicitly set template folder
 )
 app.wsgi_app = ProxyFix(app.wsgi_app)
-
-# Load the PyTorch model
-MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
 
 # Define the model class (same as in your notebook)
 class ResNetClassifier(nn.Module):
@@ -46,36 +44,56 @@ class_mapping = {
     2: 'Pneumonia'   # Class 2 (not 3) for Pneumonia
 }
 
-# Initialize model only if the file exists
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+    return None
+
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://drive.google.com/uc?export=download"
+    
+    session = requests.Session()
+    
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    token = get_confirm_token(response)
+    
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+    
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
+    
+    # Download the file
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+
+# Initialize model
+MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
+GDRIVE_FILE_ID = '1LLTVVGjEumLB7WMGMBVmtsCCjYOerhMZ'  # Extract this from your Google Drive link
+
 model = None
 try:
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model from Google Drive...")
+        download_file_from_google_drive(GDRIVE_FILE_ID, MODEL_PATH)
+        print("Download completed!")
+    
+    print(f"Loading model from {MODEL_PATH}")
     model = ResNetClassifier(num_classes=3)
-    if os.path.exists(MODEL_PATH):
-        print(f"Found model file at {MODEL_PATH}")
-        print(f"File size: {os.path.getsize(MODEL_PATH) / (1024*1024):.2f} MB")
-        
-        try:
-            # First try loading with weights_only=False
-            checkpoint = torch.load(
-                MODEL_PATH, 
-                map_location='cpu'
-            )
-            
-            # Add more detailed error checking
-            if isinstance(checkpoint, dict):
-                print(f"Checkpoint keys: {checkpoint.keys()}")
-                if 'state_dict' in checkpoint:
-                    checkpoint = checkpoint['state_dict']
-            
-            model.load_state_dict(checkpoint, strict=False)
-            model.eval()
-            print("Model loaded successfully")
-        except Exception as load_error:
-            print(f"Error loading state dict: {load_error}")
-            model = None
-    else:
-        print(f"Warning: Model file not found at {MODEL_PATH}")
-        model = None
+    checkpoint = torch.load(MODEL_PATH, map_location='cpu')
+    
+    if isinstance(checkpoint, dict):
+        if 'state_dict' in checkpoint:
+            checkpoint = checkpoint['state_dict']
+    
+    model.load_state_dict(checkpoint)
+    model.eval()
+    print("Model loaded successfully")
+    
 except Exception as e:
     print(f"Error loading model: {e}")
     print(f"Error type: {type(e)}")
