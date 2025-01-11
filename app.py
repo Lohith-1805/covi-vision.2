@@ -45,9 +45,14 @@ class_mapping = {
     2: 'Pneumonia'   # Class 2 (not 3) for Pneumonia
 }
 
-model = ResNetClassifier(num_classes=3)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
-model.eval()  # Set to evaluation mode
+model = None # Initialize model as None
+
+def load_model():
+    global model
+    if model is None:
+        model = ResNetClassifier(num_classes=3)
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+        model.eval()  # Set to evaluation mode
 
 @app.route('/')
 def index():
@@ -72,6 +77,7 @@ def test():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        load_model() # Load model only when needed
         file = request.files['image']
         
         # Read and preprocess the image
