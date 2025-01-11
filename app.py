@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, render_template, request, jsonify, url_for
 import torch
 from torchvision import transforms
@@ -96,19 +97,14 @@ def predict():
             confidence = float(probabilities[0][predicted_class])
         
         # Use the correct class mapping
-        result = {
-            0: "COVID",
-            1: "Normal",
-            2: "Pneumonia"
-        }
-        
         return jsonify({
             'success': True,
-            'prediction': result[predicted_class],
+            'prediction': class_mapping[predicted_class],
             'confidence': f"{confidence * 100:.2f}%"
         })
         
     except Exception as e:
+        logging.error(f"An error occurred: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
