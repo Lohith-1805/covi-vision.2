@@ -46,7 +46,7 @@ class_mapping = {
 }
 
 model = ResNetClassifier(num_classes=3)
-model.load_state_dict(torch.load(MODEL_PATH, weights_only=True))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')), weights_only=True)
 model.eval()  # Set to evaluation mode
 
 @app.route('/')
