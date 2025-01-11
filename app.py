@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify
+import logging
+from flask import Flask, render_template, request, jsonify, url_for
 import torch
 from torchvision import transforms
 import numpy as np
@@ -6,17 +7,20 @@ import cv2
 import os
 from PIL import Image
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision.models as models
-from werkzeug.middleware.proxy_fix import ProxyFix
+import traceback
 
-app = Flask(__name__,
-    static_url_path='/static',
-    static_folder='static',
-    template_folder='templates'
+app = Flask(__name__, 
+    static_url_path='/static',  # explicitly set static url path
+    static_folder='static',     # explicitly set static folder
+    template_folder='templates' # explicitly set template folder
 )
-app.wsgi_app = ProxyFix(app.wsgi_app)
 
-# Define the model class
+# Load the PyTorch model
+MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
+
+# Define the model class (same as in your notebook)
 class ResNetClassifier(nn.Module):
     def __init__(self, num_classes=3):
         super(ResNetClassifier, self).__init__()
@@ -35,39 +39,21 @@ class ResNetClassifier(nn.Module):
     def forward(self, x):
         return self.resnet(x)
 
-# Class mapping
+# Updated class mapping as requested
 class_mapping = {
-    0: 'COVID',
-    1: 'Normal',
-    2: 'Pneumonia'
+    0: 'COVID',      # Class 0 for COVID
+    1: 'Normal',     # Class 1 for Normal
+    2: 'Pneumonia'   # Class 2 (not 3) for Pneumonia
 }
 
-# Model path
-MODEL_PATH = 'model_checkpoints/covid_model_converted.pth'
+model = None # Initialize model as None
 
 def load_model():
-    try:
-        print(f"Loading model from {MODEL_PATH}")
+    global model
+    if model is None:
         model = ResNetClassifier(num_classes=3)
-        state_dict = torch.load(MODEL_PATH, map_location='cpu')
-        model.load_state_dict(state_dict)
-        model.eval()
-        print("Model loaded successfully")
-        return model
-    except Exception as e:
-        print(f"Error loading model: {e}")
-        print(f"Error type: {type(e)}")
-        print(f"Error details: {str(e)}")
-        return None
-
-# Initialize model
-model = load_model()
-
-if model is not None:
-    print("Model initialized and ready for predictions")
-    print(f"Model device: {next(model.parameters()).device}")
-else:
-    print("WARNING: Model failed to load - predictions will not be available")
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+        model.eval()  # Set to evaluation mode
 
 @app.route('/')
 def index():
@@ -91,39 +77,46 @@ def test():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None:
-        return jsonify({
-            'success': False,
-            'error': 'Model not loaded'
-        })
     try:
+        load_model() # Load model only when needed
         file = request.files['image']
-        image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
-        image = cv2.resize(image, (224, 224))
         
+        # Read and preprocess the image
+        image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
+        image = cv2.resize(image, (224, 224))  # Match the IMG_HEIGHT and IMG_WIDTH
+        
+        # Apply the same normalization as in training
         transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         
+        # Convert to PIL Image for PyTorch transforms
         image_pil = Image.fromarray(image)
-        image_tensor = transform(image_pil).unsqueeze(0)
+        image_tensor = transform(image_pil)
+        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
         
+        # Make prediction
         with torch.no_grad():
             outputs = model(image_tensor)
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
             predicted_class = torch.argmax(probabilities[0]).item()
+            confidence = float(probabilities[0][predicted_class])
         
+        # Use the correct class mapping
         return jsonify({
             'success': True,
-            'prediction': class_mapping[predicted_class]
+            'prediction': class_mapping[predicted_class],
+            'confidence': f"{confidence * 100:.2f}%"
         })
+        
     except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        logging.error(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)
         })
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True)
