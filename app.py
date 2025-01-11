@@ -9,6 +9,7 @@ from PIL import Image
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
+import traceback
 
 app = Flask(__name__, 
     static_url_path='/static',  # explicitly set static url path
@@ -111,6 +112,7 @@ def predict():
         
     except Exception as e:
         logging.error(f"An error occurred: {e}")
+        logging.error(traceback.format_exc())
         return jsonify({
             'success': False,
             'error': str(e)
