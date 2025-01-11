@@ -1,26 +1,29 @@
 import logging
-from flask import Flask, render_template, request, jsonify, url_for
+import os
+from flask import Flask, render_template, request, jsonify
 import torch
 from torchvision import transforms
 import numpy as np
 import cv2
-import os
 from PIL import Image
 import torch.nn as nn
-import torch.nn.functional as F
 import torchvision.models as models
 import traceback
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__, 
-    static_url_path='/static',  # explicitly set static url path
-    static_folder='static',     # explicitly set static folder
-    template_folder='templates' # explicitly set template folder
+    static_url_path='/static',
+    static_folder='static',
+    template_folder='templates'
 )
 
-# Load the PyTorch model
-MODEL_PATH = 'model_checkpoints/covid_classifier_resnet_3classes.h5'
+# Update model path to be relative to the current directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, 'model_checkpoints', 'covid_classifier_resnet_3classes.h5')
 
-# Define the model class (same as in your notebook)
 class ResNetClassifier(nn.Module):
     def __init__(self, num_classes=3):
         super(ResNetClassifier, self).__init__()
@@ -39,84 +42,112 @@ class ResNetClassifier(nn.Module):
     def forward(self, x):
         return self.resnet(x)
 
-# Updated class mapping as requested
 class_mapping = {
-    0: 'COVID',      # Class 0 for COVID
-    1: 'Normal',     # Class 1 for Normal
-    2: 'Pneumonia'   # Class 2 (not 3) for Pneumonia
+    0: 'COVID',
+    1: 'Normal',
+    2: 'Pneumonia'
 }
 
-model = None # Initialize model as None
+model = None
 
 def load_model():
     global model
-    if model is None:
-        model = ResNetClassifier(num_classes=3)
-        model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
-        model.eval()  # Set to evaluation mode
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/precautions')
-def precautions():
-    return render_template('precautions.html')
-
-@app.route('/vaccinations')
-def vaccinations():
-    return render_template('vaccinations.html')
-
-@app.route('/test')
-def test():
-    return render_template('test.html')
+    try:
+        if model is None:
+            logger.info(f"Loading model from path: {MODEL_PATH}")
+            if not os.path.exists(MODEL_PATH):
+                raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
+            
+            model = ResNetClassifier(num_classes=3)
+            model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+            model.eval()
+            logger.info("Model loaded successfully")
+    except Exception as e:
+        logger.error(f"Error loading model: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        load_model() # Load model only when needed
+        # Check if file was actually sent
+        if 'image' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No image file provided'
+            }), 400
+        
         file = request.files['image']
-        
-        # Read and preprocess the image
-        image = cv2.imdecode(np.fromstring(file.read(), np.uint8), cv2.IMREAD_COLOR)
-        image = cv2.resize(image, (224, 224))  # Match the IMG_HEIGHT and IMG_WIDTH
-        
-        # Apply the same normalization as in training
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
-        
-        # Convert to PIL Image for PyTorch transforms
-        image_pil = Image.fromarray(image)
-        image_tensor = transform(image_pil)
-        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
-        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No selected file'
+            }), 400
+
+        # Load model
+        try:
+            load_model()
+        except Exception as e:
+            logger.error(f"Model loading error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Model loading failed: {str(e)}'
+            }), 500
+
+        # Process image
+        try:
+            image_bytes = file.read()
+            image = cv2.imdecode(np.fromstring(image_bytes, np.uint8), cv2.IMREAD_COLOR)
+            if image is None:
+                raise ValueError("Failed to decode image")
+            
+            image = cv2.resize(image, (224, 224))
+            
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
+            
+            image_pil = Image.fromarray(image)
+            image_tensor = transform(image_pil)
+            image_tensor = image_tensor.unsqueeze(0)
+
+        except Exception as e:
+            logger.error(f"Image processing error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Image processing failed: {str(e)}'
+            }), 400
+
         # Make prediction
-        with torch.no_grad():
-            outputs = model(image_tensor)
-            probabilities = torch.nn.functional.softmax(outputs, dim=1)
-            predicted_class = torch.argmax(probabilities[0]).item()
-            confidence = float(probabilities[0][predicted_class])
-        
-        # Use the correct class mapping
-        return jsonify({
-            'success': True,
-            'prediction': class_mapping[predicted_class],
-            'confidence': f"{confidence * 100:.2f}%"
-        })
-        
+        try:
+            with torch.no_grad():
+                outputs = model(image_tensor)
+                probabilities = torch.nn.functional.softmax(outputs, dim=1)
+                predicted_class = torch.argmax(probabilities[0]).item()
+                confidence = float(probabilities[0][predicted_class])
+
+            return jsonify({
+                'success': True,
+                'prediction': class_mapping[predicted_class],
+                'confidence': f"{confidence * 100:.2f}%"
+            })
+
+        except Exception as e:
+            logger.error(f"Prediction error: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({
+                'success': False,
+                'error': f'Prediction failed: {str(e)}'
+            }), 500
+
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
-        logging.error(traceback.format_exc())
+        logger.error(f"General error: {str(e)}")
+        logger.error(traceback.format_exc())
         return jsonify({
             'success': False,
-            'error': str(e)
-        })
+            'error': f'An unexpected error occurred: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
